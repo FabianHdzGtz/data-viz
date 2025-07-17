@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Slope Chart</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+
+    svg {
+      width: 900px;
+      height: 500px;
+      border: 3px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+<svg width="900" height="600"  ></svg> 
+
+<script>
+
+  const svg = d3.select("svg");
+  const width = +svg.attr("width");
+  const height = +svg.attr("height");
+  const margin = { top: 40, right: 200, bottom: 40, left: 80 };
+  console.log(width)
+
+  d3.csv("../../data/episode_vs_series_rating.csv").then(data => {
+    
+    data.forEach(d => {
+    d.rating = +d.rating;
+    d.average_episode = +d.average_episode;
+
+  });
+
+  data.sort((a, b) => d3.ascending(a.series, b.series));
+
+  const y = d3.scaleLinear()
+    .domain([7.0, 9.7])
+    .range([height - margin.bottom, margin.top]);
+
+  const x = d3.scalePoint()
+    .domain(["Series rating", "Avg episode rating"])
+    .range([margin.left, width - margin.right - 100]);
+
+  svg.selectAll(".axis")
+    .data(["Series rating", "Avg episode rating"])
+    .enter()
+    .append("g")
+    .attr("transform", d => `translate(${x(d)},0)`)
+    .each(function(d) {
+      const g = d3.select(this);
+      g.append("line")
+        .attr("y1", margin.top)
+        .attr("y2", height - margin.bottom)
+        .attr("stroke", "#333")
+        .attr("stroke-dasharray", "2,2");
+
+      const axis = d3.axisLeft(y).ticks(6).tickSize(0).tickPadding(5);
+      g.call(axis);
+
+      g.selectAll("text")
+        .attr("x", d === "Avg episode rating" ? 10 : -10)
+        .attr("text-anchor", d === "Avg episode rating" ? "start" : "end");
+    });
+
+  });
+
+
+</script>
+
+</body>
+</html>
